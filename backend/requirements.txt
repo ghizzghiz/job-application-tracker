@@ -1,0 +1,14 @@
+fastapi>=0.115.5
+pydantic>=2.0,<3.0
+pydantic-settings
+uvicorn
+sqlalchemy
+psycopg2-binary
+alembic
+sqlalchemy
+passlib[bcrypt]
+python-jose[cryptography]==3.3.0
+python-dotenv
+sendgrid
+email-validator
+boto3

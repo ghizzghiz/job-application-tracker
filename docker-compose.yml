@@ -1,0 +1,30 @@
+#version: '3.8'
+
+services:
+  web:
+    build: ./backend
+    volumes:
+      - ./backend:/app  # Syncs your local `backend` with `/app` in the container
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://user:password@db/job_tracker
+  
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: job_tracker
+    ports:
+      - "5432:5432" 
+    
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+
+#    command: >
+#      -c listen_addresses='*'
