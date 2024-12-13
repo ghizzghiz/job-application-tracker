@@ -5,10 +5,13 @@ uvicorn
 sqlalchemy
 psycopg2-binary
 alembic
-sqlalchemy
+passlib
 passlib[bcrypt]
+bcrypt
 python-jose[cryptography]==3.3.0
 python-dotenv
 sendgrid
 email-validator
 boto3
+apscheduler
+python-multipart

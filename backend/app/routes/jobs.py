@@ -1,9 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from typing import Optional
+from datetime import date
 from sqlalchemy.orm import Session
 from app import crud, schemas
 from app.database import SessionLocal
 #from app.routes.auth import get_current_user
 from app.routes.auth_get_user import get_current_user
+from app.utils import upload_file_to_s3
 
 router = APIRouter()
 
@@ -15,13 +18,32 @@ def get_db():
         db.close()
 
 @router.post("/jobs", response_model=schemas.JobApplication)
-def create_job(
-    job: schemas.JobApplicationCreate,
+async def create_job(
+    job_title: str = Form(...),
+    company: Optional[str] = Form(None),
+    location: Optional[str] = Form(None),
+    application_date: Optional[date] = Form(None),
+    status: Optional[str] = Form(None),
+    comments: Optional[str] = Form(None),
+    cv: Optional[UploadFile] = File(None),
+    cover_letter: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
-    current_user: schemas.User = Depends(get_current_user), 
+    current_user: schemas.User = Depends(get_current_user),
 ):
-    return crud.create_job(db=db, job=job, user_id=current_user.id)
+    cv_url = upload_file_to_s3(cv.file, cv.filename, folder="cvs") if cv else None
+    cover_letter_url = upload_file_to_s3(cover_letter.file, cover_letter.filename, folder="cover_letters") if cover_letter else None
 
+    job_data = {
+        "job_title": job_title,
+        "company": company,
+        "location": location,
+        "application_date": application_date,
+        "status": status,
+        "comments": comments,
+        "cv": cv_url,
+        "cover_letter": cover_letter_url,
+    }
+    return crud.create_job(db=db, job=schemas.JobApplicationCreate(**job_data), user_id=current_user.id)
 
 @router.get("/jobs", response_model=list[schemas.JobApplication])
 def list_job(
@@ -36,7 +58,6 @@ def delete_job(
     db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_user)
 ):
-    """Delete a job by its ID."""
     db_job = crud.get_job_by_id(db=db, job_id=job_id)
     if not db_job or db_job.owner_id != current_user.id:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -50,7 +71,6 @@ def get_job_by_id(
     db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_user), 
 ):
-    """Get a job by its ID."""
     db_job = crud.get_job_by_id(db=db, job_id=job_id)
     if not db_job or db_job.owner_id != current_user.id:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -64,8 +84,22 @@ def update_job_by_id(
     db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_user), 
 ):
-    """Update a job by its ID."""
     db_job = crud.update_job(db=db, job_id=job_id, updated_job=updated_job)
     if not db_job or db_job.owner_id != current_user.id:
         raise HTTPException(status_code=404, detail="Job not found")
     return db_job
+
+# Upload document using AWS S3 
+@router.post("/jobs/{job_id}/upload", response_model=dict)
+def upload_job_materials(
+    job_id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: schemas.User = Depends(get_current_user),
+):
+    db_job = crud.get_job_by_id(db=db, job_id=job_id)
+    if not db_job or db_job.owner_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    file_url = upload_file_to_s3(file.file, file.filename)
+    return {"file_url": file_url}

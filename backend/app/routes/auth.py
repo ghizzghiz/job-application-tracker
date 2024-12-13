@@ -22,26 +22,6 @@ def get_db():
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = "HS256"
 
-"""
-from fastapi.security import OAuth2PasswordBearer
-# Define the OAuth2 scheme
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
-
-# Function to decode the JWT and retrieve the current user
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("sub")
-        if email is None:
-            raise HTTPException(status_code=401, detail="Invalid token")
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
-
-    user = crud.get_user_by_email(db, email=email)
-    if user is None:
-        raise HTTPException(status_code=401, detail="User not found")
-    return user"""
-
 @router.post("/register", response_model=schemas.User)
 def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)

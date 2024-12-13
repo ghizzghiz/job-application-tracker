@@ -6,8 +6,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from fastapi.openapi.utils import get_openapi
 from app.database import SessionLocal, engine
+import logging
+from fastapi.logger import logger as fastapi_logger
 
 app = FastAPI()
+
+logging.basicConfig(level=logging.DEBUG)
+fastapi_logger.setLevel(logging.DEBUG)
 
 # Enables CORS -- Cross-origin resource sharing (CORS) is a mechanism 
 # that allows secure data transfers and requests between servers and browsers.
@@ -40,11 +45,6 @@ def custom_openapi():
 
 app.openapi = custom_openapi
 
-
-# Database setup
-"""SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)"""
 
 # Register routers
 app.include_router(auth.router, tags=["auth"]) 

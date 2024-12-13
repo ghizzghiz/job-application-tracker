@@ -20,7 +20,7 @@ def get_db():
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
 
-# Function to decode token and get the current user
+# Decode token and get the current user
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> schemas.User:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])

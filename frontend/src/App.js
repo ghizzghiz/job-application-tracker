@@ -6,6 +6,7 @@ import Register from "./pages/Register";
 import Reminders from "./pages/Reminders";
 import EditReminder from "./pages/EditReminder";
 import JobList from "./pages/JobList";
+import EditJob from "./pages/EditJob";
 import JobForm from "./pages/JobForm";
 import AddReminder from "./pages/AddReminder";
 import "./App.css";
@@ -64,7 +65,7 @@ const App = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/job-form" element={<JobForm token={token} />} />
           <Route path="/jobs" element={<JobList token={token} />} />
-          <Route path="/edit-job/:id" element={<JobForm token={token} />} />
+          <Route path="/edit-job" element={<EditJob token={token} />} />
           <Route path="/add-reminder" element={<AddReminder token={token} />} />
           <Route path="/reminders" element={<Reminders token={token} />} />
           <Route

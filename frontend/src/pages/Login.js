@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { TextField, Button, Typography, Box, Container } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 const Login = ({ setToken }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -14,6 +16,7 @@ const Login = ({ setToken }) => {
       setToken(token);
       localStorage.setItem("token", token);
       alert("Login successful!");
+      navigate("/jobs"); // Redirect to Job List page
     } catch (error) {
       console.error("Login failed:", error);
       alert("Login failed. Check your credentials.");

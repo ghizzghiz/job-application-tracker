@@ -2,7 +2,6 @@ from sqlalchemy.orm import Session
 from app import models, schemas
 from fastapi import Depends
 from app.database import SessionLocal
-#from app.routes.auth import get_current_user
 from app.routes.auth_get_user import get_current_user
 
 def get_db():
@@ -14,11 +13,6 @@ def get_db():
 
 # Create a new reminder
 def create_reminder(db: Session, reminder: schemas.ReminderCreate, user_id: int):
-
-    """def create_reminder(reminder: schemas.ReminderCreate, 
-                    db: Session = Depends(get_db),  # Inject `db` as a dependency
-                    user_id: int = Depends(get_current_user)):"""
-    # create_reminder(db: Session, reminder: schemas.ReminderCreate, user_id: int):
     db_reminder = models.Reminder(
         reminder_description=reminder.reminder_description,
         reminder_date=reminder.reminder_date,

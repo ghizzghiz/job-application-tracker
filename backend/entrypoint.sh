@@ -11,10 +11,10 @@ until nc -z db 5432; do
 done
 echo "Database is up - continuing..."
 
-# Run database migrations (if using Alembic)
+# Run database migrations (using Alembic)
 echo "Running database migrations..."
 alembic upgrade head
 
-# Start the FastAPI application server
+# Start the FastAPI server
 echo "Starting FastAPI server..."
 exec uvicorn app.main:app --host 0.0.0.0 --port 8000

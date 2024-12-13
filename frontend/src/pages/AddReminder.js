@@ -1,94 +1,87 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { TextField, Button, Typography, Box, Container, Alert } from "@mui/material";
+import { TextField, Button, Typography, Box, Container } from "@mui/material";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 
-const AddReminder = ({ token }) => {
-  const [reminderDescription, setMessage] = useState("");
-  const [reminderDateTime, setReminderDateTime] = useState("");
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+function AddReminder({ token }) {
+  const [reminder, setReminder] = useState({
+    reminder_description: "",
+    reminder_date: "",
+  });
+
+  // Mountain Time Zone
+  const MOUNTAIN_TIME_ZONE = "America/Denver";
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setReminder((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSuccess(false);
-    setError(null);
+
+    // Convert Mountain Time to UTC before sending to the backend
+    const mountainTimeDate = dayjs.tz(reminder.reminder_date, MOUNTAIN_TIME_ZONE);
+    const utcDate = mountainTimeDate.utc().format();
+
+    const payload = { ...reminder, reminder_date: utcDate };
+
+    if (dayjs().isAfter(mountainTimeDate)) {
+      alert("Cannot set reminders for past dates and times.");
+      return;
+    }
+
     try {
-      await axios.post(
-        "http://localhost:8000/reminders/",
-        {
-          reminder_description: reminderDescription,
-          reminder_date: reminderDateTime,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setSuccess(true);
-      setMessage("");
-      setReminderDateTime("");
+      await axios.post("http://localhost:8000/reminders/", payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      alert("Reminder added successfully!");
+      setReminder({ reminder_description: "", reminder_date: "" });
     } catch (error) {
-      console.error("Error adding reminder:", error);
-      if (error.response && error.response.status === 401) {
-        setError("Unauthorized. Please log in again.");
-      } else {
-        setError("Failed to add reminder. Please try again.");
-      }
+      console.error("Failed to add reminder:", error.response?.data || error.message);
+      alert("Failed to add reminder. Please try again.");
     }
   };
-
-  if (!token) {
-    return (
-      <Container maxWidth="sm">
-        <Typography variant="h6" color="error">
-          Please log in to add reminders.
-        </Typography>
-      </Container>
-    );
-  }
 
   return (
     <Container maxWidth="sm">
       <Typography variant="h4" gutterBottom>
         Add Reminder
       </Typography>
-      {error && <Alert severity="error">{error}</Alert>}
-      {success && <Alert severity="success">Reminder added successfully!</Alert>}
       <Box
         component="form"
         onSubmit={handleSubmit}
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-          mt: 2,
-        }}
+        sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 4 }}
       >
         <TextField
           label="Reminder Description"
-          value={reminderDescription}
-          onChange={(e) => setMessage(e.target.value)}
+          name="reminder_description"
+          value={reminder.reminder_description}
+          onChange={handleInputChange}
           required
           fullWidth
         />
         <TextField
-          label="Reminder Date & Time"
+          label="Reminder Date (Mountain Time)"
+          name="reminder_date"
           type="datetime-local"
-          value={reminderDateTime}
-          onChange={(e) => setReminderDateTime(e.target.value)}
-          InputLabelProps={{
-            shrink: true, // Ensures the label doesn't overlap
-          }}
+          value={reminder.reminder_date}
+          onChange={handleInputChange}
+          InputLabelProps={{ shrink: true }}
           required
           fullWidth
         />
-        <Button type="submit" variant="contained" fullWidth>
+        <Button variant="contained" type="submit" fullWidth>
           Add Reminder
         </Button>
       </Box>
     </Container>
   );
-};
+}
 
 export default AddReminder;

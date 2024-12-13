@@ -22,10 +22,11 @@ class User(BaseModel):
     email: EmailStr
 
     class Config:
-        #orm_mode = True
         from_attributes = True
 
-####### LOGIN RESPONSE MODEL
+##############################
+# LOGIN RESPONSE MODEL
+##############################
 class LoginReturns(BaseModel):
     access_token: str
     token_type: str
@@ -41,6 +42,9 @@ class JobApplicationBase(BaseModel):
     location: Optional[str] = None
     application_date: Optional[date] = None
     status: Optional[Literal["Applied", "Interview Scheduled", "Offer Received", "Rejected"]] = None
+    comments: Optional[str] = None
+    cv: Optional[str] = None
+    cover_letter: Optional[str] = None
 
 # Schema for creating a new job application
 class JobApplicationCreate(JobApplicationBase):
@@ -52,7 +56,6 @@ class JobApplication(JobApplicationBase):
     owner_id: int
 
     class Config:
-        #orm_mode = True
         from_attributes = True
 
 class UpdatedJob(BaseModel): 
@@ -62,6 +65,9 @@ class UpdatedJob(BaseModel):
     location: Optional[str] = None
     application_date: Optional[date] = None
     status: Optional[Literal["Applied", "Interview Scheduled", "Offer Received", "Rejected"]] = None
+    comments: Optional[str] = None
+    cv: Optional[str] = None
+    cover_letter: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -71,7 +77,7 @@ class UpdatedJob(BaseModel):
 ##############################
 class ReminderBase(BaseModel):
     reminder_description: str
-    reminder_date: datetime # in UTC
+    reminder_date: datetime 
 
 class ReminderCreate(ReminderBase):
     pass
@@ -89,7 +95,7 @@ class DeletedReminder(BaseModel):
 
 class UpdatedReminder(BaseModel):
     reminder_description: Optional[str] = None
-    reminder_date: Optional[datetime] = None # in UTC
+    reminder_date: Optional[datetime] = None
 
     class Config:
         from_attributes = True

@@ -18,14 +18,17 @@ class JobApplication(Base):
     location = Column(String)
     application_date = Column(Date)
     status = Column(String)
+    comments = Column(Text, nullable=True)
     owner_id = Column(Integer, ForeignKey("users.id"))
     owner = relationship("User", back_populates="jobs")
+    # CV, Resume, Cover Letter - links stored on db for AWS S3 file storage
+    cv = Column(String, nullable=True)
+    cover_letter = Column(String, nullable=True)
 
 class Reminder(Base):
     __tablename__ = "reminders"
 
     id = Column(Integer, primary_key=True, index=True)
     reminder_description = Column(String, nullable=False)
-    reminder_date = Column(DateTime(timezone=True), server_default=func.now())
+    reminder_date = Column(DateTime, server_default=func.now())
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    #owner = relationship("User", back_populates="reminders")
